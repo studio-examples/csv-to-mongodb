@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:context="http://www.springframework.org/schema/context" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <mongo:config name="Mongo_DB" database="customers" doc:name="Mongo DB" password="mule" username="mule"/>
+    <context:property-placeholder location="common.properties"/>
+    <data-mapper:config name="CSV_To_Map" transformationGraphPath="csv_to_map.grf" doc:name="CSV_To_Map"/>
+    <flow name="csv-to-mongodbFlow1" doc:name="csv-to-mongodbFlow1">
+        <file:inbound-endpoint responseTimeout="10000" doc:name="File" path="${path.to.dir}"/>
+        <data-mapper:transform config-ref="CSV_To_Map" doc:name="CSV To Map"/>
+        <logger message="saving objects: #[payload]" level="INFO" doc:name="Logger"/>
+        <enricher source="#[payload]" target="#[flowVars['existsCollection']]" doc:name="Message Enricher">
+            <mongo:exists-collection config-ref="Mongo_DB" collection="customers" doc:name="Mongo DB"/>
+        </enricher>
+        <choice doc:name="Choice">
+            <when expression="!flowVars['existsCollection']">
+                <mongo:create-collection config-ref="Mongo_DB" collection="customers" doc:name="Mongo DB"/>
+            </when>
+            <otherwise>
+                <logger message="Customer Collection already exists." level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+        <foreach doc:name="For Each">
+            <mongo:save-object-from-map config-ref="Mongo_DB" collection="customers" doc:name="Mongo DB">
+                <mongo:element-attributes ref="#[payload]"/>
+            </mongo:save-object-from-map>
+        </foreach>
+    </flow>
+</mule>

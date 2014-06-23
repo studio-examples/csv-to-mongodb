@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mule-configuration xmlns="http://www.mulesoft.com/tooling/messageflow" name="csv-to-mongodb">
+    <global-element name="Mongo DB" type="http://www.mulesoft.org/schema/mule/mongo/config" entity-id="Mongo DB#1">
+        <properties>
+            <property name="port"/>
+            <property name="host"/>
+            <property name="connectionsPerHost"/>
+            <property name="maxWaitTime"/>
+            <property name="password" value="mule"/>
+            <property name="autoConnectRetry"/>
+            <property name="database" value="customers"/>
+            <property name="username" value="mule"/>
+            <property name="connectTimeout"/>
+            <property name="socketTimeout"/>
+            <property name="name" value="Mongo_DB"/>
+            <property name="threadsAllowedToBlockForConnectionMultiplier"/>
+            <property name="auxiliary;index" value="1"/>
+        </properties>
+    </global-element>
+    <global-element name="Property Placeholder" type="http://www.springframework.org/schema/context/property-placeholder" entity-id="Property Placeholder#1">
+        <properties>
+            <property name="properties-ref"/>
+            <property name="order"/>
+            <property name="location" value="common.properties"/>
+            <property name="local-override"/>
+            <property name="system-properties-mode"/>
+            <property name="file-encoding"/>
+            <property name="ignore-resource-not-found"/>
+            <property name="ignore-unresolvable"/>
+            <property name="auxiliary;index" value="2"/>
+        </properties>
+    </global-element>
+    <global-element name="CSV_To_Map" type="http://www.mulesoft.org/schema/mule/ee/data-mapper/config" entity-id="DataMapper#1">
+        <properties>
+            <property name="name" value="CSV_To_Map"/>
+            <property name="transformationGraphPath" value="csv_to_map.grf"/>
+            <property name="auxiliary;index" value="3"/>
+        </properties>
+    </global-element>
+    <flow SubFlow="false" name="csv-to-mongodbFlow1" type="http://www.mulesoft.org/schema/mule/core/flow" entity-id="b9dcd5a9-bbff-4da4-9287-3a9d52034a0b">
+        <properties>
+            <property name="initialState" value=""/>
+            <property name="auxiliary;erased;initialState" value="true"/>
+            <property name="bussinessEventsLabel" value=""/>
+            <property name="tracking:enable-default-events" value="false"/>
+            <property name="auxiliary;index" value="4"/>
+            <property name="updated"/>
+            <property-collection name="@http://www.mulesoft.org/schema/mule/ee/tracking/transaction;653198532"/>
+        </properties>
+        <description></description>
+        <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#1">
+            <graphicalData x="0" y="0" width="0" height="0"/>
+            <endpoint direction="Inbound" name="File" type="http://www.mulesoft.org/schema/mule/file/endpoint" entity-id="File#1">
+                <graphicalData x="21" y="216" width="68" height="69"/>
+                <properties>
+                    <property name="reverseOrder"/>
+                    <property name="moveToPattern"/>
+                    <property name="pollingFrequency"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="comparator"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="exchange-pattern" value="one-way"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="moveToDirectory"/>
+                    <property name="address"/>
+                    <property name="fileAge"/>
+                    <property name="path" value="${path.to.dir}"/>
+                    <property name="encoding"/>
+                    <property name="outputPattern"/>
+                    <property name="responseTimeout" value="10000"/>
+                    <property name="mimeType"/>
+                    <property name="auxiliary;index" value="5"/>
+                    <property name="connector-ref"/>
+                </properties>
+            </endpoint>
+            <pattern name="CSV To Map" type="http://www.mulesoft.org/schema/mule/ee/data-mapper/data-mapper-connector" entity-id="DataMapper#2">
+                <graphicalData x="149" y="216" width="79" height="69"/>
+                <properties>
+                    <property name="returnClass"/>
+                    <property name="input-ref"/>
+                    <property name="stream"/>
+                    <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/ee/data-mapper/transform"/>
+                    <property name="target"/>
+                    <property name="config-ref" value="CSV_To_Map"/>
+                    <property name="pipeSize"/>
+                    <property name="auxiliary;index" value="6"/>
+                </properties>
+            </pattern>
+            <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="Logger#1">
+                <graphicalData x="288" y="216" width="68" height="69"/>
+                <properties>
+                    <property name="message" value="saving objects: #[payload]"/>
+                    <property name="category"/>
+                    <property name="level" value="INFO"/>
+                    <property name="auxiliary;index" value="7"/>
+                </properties>
+                <description></description>
+            </pattern>
+            <scope name="Message Enricher" type="http://www.mulesoft.org/schema/mule/core/enricher" entity-id="c8adffca-2149-4fac-bed2-5e48e000c7d9">
+                <graphicalData x="416" y="193" width="115" height="115"/>
+                <properties>
+                    <property name="source" value="#[payload]"/>
+                    <property name="updated"/>
+                    <property name="target" value="#[flowVars['existsCollection']]"/>
+                </properties>
+                <description></description>
+                <compartment entity-id="175389d4-213e-43e8-b56d-b365e0b0e1f3">
+                    <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="9e7053d4-3c50-46d9-b521-154d477ed603">
+                        <pattern name="Mongo DB" type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" entity-id="e8217095-8618-4473-8273-0f1043c7947f">
+                            <graphicalData x="0" y="0" width="0" height="0"/>
+                            <properties>
+<property name="username" value=""/>
+<property name="auxiliary;moved-from"/>
+<property name="updated"/>
+<property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/mongo/exists-collection"/>
+<property name="collection" value="customers"/>
+<property name="password" value=""/>
+<property name="config-ref" value="Mongo_DB"/>
+<property name="database" value=""/>
+                            </properties>
+                            <description></description>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </scope>
+            <splitter index="0" name="Choice" type="org.mule.tooling.ui.modules.core.pattern.cbr" entity-id="7ef52db8-a41e-435c-9eb9-b397a39e159e">
+                <graphicalData x="722" y="154" width="237" height="193"/>
+                <properties>
+                    <property name="updated"/>
+                    <property name=";INDEX" value="0"/>
+                    <property name="tracking:enable-default-events" value="false"/>
+                    <property-collection name="1d0b9165-d682-4ef6-a716-eff472bb5ad6">
+                        <property name="choice.expression" value="!flowVars['existsCollection']"/>
+                    </property-collection>
+                </properties>
+                <description></description>
+                <pattern name="Choice" type="org.mule.tooling.ui.modules.core.pattern.cbr" entity-id="1f65983d-3fc3-43e5-8bf8-c3baf81f3d91">
+                    <properties>
+                        <property name="updated"/>
+                        <property name=";INDEX" value="0"/>
+                        <property name="tracking:enable-default-events" value="false"/>
+                        <property-collection name="1d0b9165-d682-4ef6-a716-eff472bb5ad6">
+                            <property name="choice.expression" value="!flowVars['existsCollection']"/>
+                        </property-collection>
+                    </properties>
+                    <description></description>
+                </pattern>
+                <compartment entity-id="3d2c9e3c-d2f3-4ec0-80dd-3d5bed9fa8e9">
+                    <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="1d0b9165-d682-4ef6-a716-eff472bb5ad6">
+                        <pattern name="Mongo DB" type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" entity-id="Mongo DB#2">
+                            <graphicalData x="739" y="161" width="71" height="69"/>
+                            <properties>
+<property name="capped"/>
+<property name="username"/>
+<property name="maxObjects"/>
+<property name="auxiliary;moved-from" value="8"/>
+<property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/mongo/create-collection"/>
+<property name="collection" value="customers"/>
+<property name="config-ref" value="Mongo_DB"/>
+<property name="password"/>
+<property name="database"/>
+<property name="size"/>
+                            </properties>
+                            <description></description>
+                        </pattern>
+                    </lane>
+                    <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="true" entity-id="5659e85d-c643-42ac-928c-de6ddca9bff7">
+                        <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="6829da41-a3d6-4fb4-b80f-dd3722dfa737">
+                            <graphicalData x="0" y="0" width="0" height="0"/>
+                            <properties>
+<property name="message" value="Customer Collection already exists."/>
+<property name="category" value=""/>
+<property name="level" value="INFO"/>
+<property name="updated"/>
+                            </properties>
+                            <description></description>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </splitter>
+            <scope name="For Each" type="http://www.mulesoft.org/schema/mule/core/foreach" entity-id="For Each#1">
+                <graphicalData x="1019" y="192" width="115" height="116"/>
+                <properties>
+                    <property name="counterVariableName"/>
+                    <property name="rootMessageVariableName"/>
+                    <property name="batchSize"/>
+                    <property name="collection"/>
+                    <property name="auxiliary;index" value="9"/>
+                </properties>
+                <compartment entity-id="compartment#1">
+                    <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#2">
+                        <pattern name="Mongo DB" type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" entity-id="Mongo DB#3">
+                            <graphicalData x="0" y="0" width="0" height="0"/>
+                            <properties>
+<property name="username"/>
+<property name="writeConcern"/>
+<property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/mongo/save-object-from-map"/>
+<property name="collection" value="customers"/>
+<property name="config-ref" value="Mongo_DB"/>
+<property name="password"/>
+<property name="database"/>
+<property name="auxiliary;index" value="10"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/mongo/save-object-from-map-element-attributess;0">
+    <property name="ref" value="#[payload]"/>
+    <property name="auxiliary;wrapIn" value="11"/>
+    <property name="auxiliary;index" value="11"/>
+</property-collection>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </scope>
+        </lane>
+    </flow>
+</mule-configuration>
