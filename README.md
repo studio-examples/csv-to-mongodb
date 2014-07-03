@@ -1,4 +1,4 @@
-#21. Importing a CSV file into mongoDB
+# Importing a CSV file into mongoDB
 
 This example illustrates how to use the mongoDB to import data in a CSV format from a local directory into mongoDB. This examples also covers other important components in the studio including the datamapper and Scopes such as the Message Enricher and Foreach.
 
